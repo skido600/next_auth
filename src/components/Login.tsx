@@ -38,6 +38,7 @@ const Login: React.FC = () => {
       if (res?.error) {
         setErrors({
           email: res.error,
+          password: "",
         });
       } else if (res?.ok) {
         // Successful login
