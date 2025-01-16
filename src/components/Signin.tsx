@@ -4,11 +4,10 @@ import { FiUsers } from "react-icons/fi";
 import { RiKey2Line } from "react-icons/ri";
 import { MdOutlineMail } from "react-icons/md";
 import { FaEye } from "react-icons/fa";
-
 import { IoEyeOff } from "react-icons/io5";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { register } from "../../action/register";
+import { toast } from "react-hot-toast"; // Import toast
 import LoaderV from "./LoaderV";
 
 const Signin: React.FC = () => {
@@ -17,48 +16,62 @@ const Signin: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
   const ref = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const [error, setError] = useState<string>("");
-  console.log(error);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (name.trim() === "") {
       setError("Username is required.");
+      toast.error("Username is required."); // Display error toast
       return;
     }
 
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
       setError("Please enter a valid email address.");
+      toast.error("Please enter a valid email address."); // Display error toast
       return;
     }
 
     if (password.trim().length < 6) {
       setError("Password must be at least 6 characters.");
+      toast.error("Password must be at least 6 characters."); // Display error toast
       return;
     }
 
     setLoading(true);
+    setError(""); // Reset error message
+    setSuccess(false); // Reset success state
+
     try {
-      const response = await register({
-        email,
-        password,
-        name,
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/customAuth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, email, password }),
+        }
+      );
 
-      if (response?.error) {
-        setError(response.error as string);
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+        toast.success("Registration successful!"); // Display success toast
+        router.push("/login");
+      } else {
+        setError(data.error || "An unexpected error occurred.");
+        toast.error(data.error || "An unexpected error occurred."); // Display error toast
       }
-      // Reset form and navigate to login
-      setName("");
-      setEmail("");
-      setPassword("");
-
-      router.push("/login");
     } catch (error) {
       console.error("Registration error:", error);
-      setError("An error occurred during registration.");
+      setError("An unexpected error occurred during registration.");
+      toast.error("An unexpected error occurred during registration."); // Display error toast
     } finally {
       setLoading(false);
     }
@@ -73,7 +86,9 @@ const Signin: React.FC = () => {
             {/* Username Field */}
             <div className="relative mb-6">
               {error && <div className="text-red-500">{error}</div>}
-
+              {success && (
+                <div className="text-blue-500">Registration successful!</div>
+              )}
               <label htmlFor="username" className="font-semibold">
                 Username
               </label>

@@ -5,54 +5,64 @@ import { FiUsers } from "react-icons/fi";
 import { RiKey2Line } from "react-icons/ri";
 import { FaEye } from "react-icons/fa";
 import { IoEyeOff } from "react-icons/io5";
-import { validateLogin } from "@/components/validate/validte";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
+import Link from "next/link";
+import LoaderV from "./LoaderV";
+import { toast } from "react-hot-toast";
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-  });
-
-  const router = useRouter(); // Initialize router here
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate login inputs
-    const isValid = validateLogin(email, password, setErrors);
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      toast.error("Please enter a valid email address.");
+      setError("Please enter a valid email address.");
+      return;
+    }
 
-    if (isValid) {
-      // Proceed with login logic
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+    if (password.trim().length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      setError("Password must be at least 6 characters.");
+      return;
+    }
 
-      if (res?.error) {
-        setErrors({
-          email: res.error,
-          password: res.error,
-        });
-      } else if (res?.ok) {
-        console.log("Login successful:", { email, password });
-        router.push("/"); // Redirect to home page
-      }
-    } else {
-      // Validation failed
-      console.log("Validation failed:", errors);
+    setError(""); // Reset the error message on form submission
+    setSuccess(false); // Reset success message
+    setLoading(true); // Start loading state
+
+    const res = await signIn("credentials", {
+      email, // Use the email state directly
+      password, // Use the password state directly
+      redirect: false,
+    });
+
+    setLoading(false); // Stop loading state after the login attempt
+
+    if (res?.error) {
+      toast.error(res?.error);
+      setError(res.error);
+    }
+
+    if (res?.ok) {
+      toast.success("welcome");
+      return router.push("/welcome");
     }
   };
+
   return (
     <main className="bg-[#D8DBBD] h-screen flex items-center justify-center">
       <article className="bg-white w-[90vw] sm:w-[400px] p-6 rounded-[7px] shadow-lg">
         <h1 className="text-center font-bold text-2xl mb-4">Login</h1>
+        {error && <div className="text-red-500">{error}</div>}
+        {success && <div className="text-blue-500">Login successful!</div>}
         <form onSubmit={handleLogin}>
           {/* Email Input */}
           <div className="relative mb-6">
@@ -68,7 +78,6 @@ const Login: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
             <FiUsers size={20} className="absolute top-8 left-1" />
-            <p className="text-red-600 text-[10px]">{errors.email}</p>
           </div>
 
           {/* Password Input */}
@@ -91,7 +100,6 @@ const Login: React.FC = () => {
               {showPassword ? <FaEye /> : <IoEyeOff />}
             </div>
             <RiKey2Line className="absolute top-8 left-1 w-6 h-6" />
-            <p className="text-red-600 text-[10px]">{errors.password}</p>
           </div>
 
           {/* Forgot Password */}
@@ -103,8 +111,9 @@ const Login: React.FC = () => {
           <button
             type="submit"
             className="w-full font-bold text-white bg-[#2A3663] p-2 rounded-full mt-4 "
+            disabled={loading} // Disable the button while loading
           >
-            Login
+            {loading ? <LoaderV /> : "Login"}
           </button>
 
           {/* Sign Up Link */}

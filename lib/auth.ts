@@ -14,7 +14,6 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Connect to the database
         await connectDB();
 
         // Find the user by email
