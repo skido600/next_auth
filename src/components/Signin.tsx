@@ -7,7 +7,7 @@ import { FaEye } from "react-icons/fa";
 import { IoEyeOff } from "react-icons/io5";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast"; // Import toast
+import { toast } from "react-hot-toast";
 import LoaderV from "./LoaderV";
 
 const Signin: React.FC = () => {
@@ -83,12 +83,16 @@ const Signin: React.FC = () => {
         <article className="bg-white w-[90vw] sm:w-[400px] p-6 rounded-lg shadow-lg">
           <h1 className="text-center font-bold text-2xl mb-4">Signup</h1>
           <form onSubmit={handleSubmit} ref={ref}>
+            <div className="flex justify-center">
+              <main className="text-[14px]">
+                {error && <div className="text-red-500">{error}</div>}
+                {success && (
+                  <div className="text-blue-500">Registration successful!</div>
+                )}
+              </main>
+            </div>
             {/* Username Field */}
             <div className="relative mb-6">
-              {error && <div className="text-red-500">{error}</div>}
-              {success && (
-                <div className="text-blue-500">Registration successful!</div>
-              )}
               <label htmlFor="username" className="font-semibold">
                 Username
               </label>

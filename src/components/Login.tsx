@@ -61,8 +61,14 @@ const Login: React.FC = () => {
     <main className="bg-[#D8DBBD] h-screen flex items-center justify-center">
       <article className="bg-white w-[90vw] sm:w-[400px] p-6 rounded-[7px] shadow-lg">
         <h1 className="text-center font-bold text-2xl mb-4">Login</h1>
-        {error && <div className="text-red-500">{error}</div>}
-        {success && <div className="text-blue-500">Login successful!</div>}
+        <div className="flex justify-center">
+          <main className="text-[14px]">
+            {error && <div className="text-red-500">{error}</div>}
+            {success && (
+              <div className="text-blue-500">Registration successful!</div>
+            )}
+          </main>
+        </div>
         <form onSubmit={handleLogin}>
           {/* Email Input */}
           <div className="relative mb-6">
