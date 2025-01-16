@@ -3,7 +3,11 @@ export const validate = (
   email: string,
   password: string,
   name: string,
-  setError: (error: { email: string; password: string; name: string }) => void
+  setError: (error: {
+    email: string;
+    password: string | null;
+    name: string | null;
+  }) => void
 ) => {
   let isValid = true;
   const newError = { email: "", password: "", name: "" };

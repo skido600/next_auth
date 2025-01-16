@@ -7,6 +7,8 @@ import { FaEye } from "react-icons/fa";
 import { IoEyeOff } from "react-icons/io5";
 import { validateLogin } from "@/components/validate/validte";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +19,9 @@ const Login: React.FC = () => {
     password: "",
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const router = useRouter(); // Initialize router here
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate login inputs
@@ -25,12 +29,26 @@ const Login: React.FC = () => {
 
     if (isValid) {
       // Proceed with login logic
-      console.log("Login successful:", { email, password });
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        setErrors({
+          email: res.error,
+        });
+      } else if (res?.ok) {
+        // Successful login
+        console.log("Login successful:", { email, password });
+        router.push("/"); // Redirect to home page
+      }
     } else {
+      // Validation failed
       console.log("Validation failed:", errors);
     }
   };
-
   return (
     <main className="bg-[#D8DBBD] h-screen flex items-center justify-center">
       <article className="bg-white w-[90vw] sm:w-[400px] p-6 rounded-[7px] shadow-lg">

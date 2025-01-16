@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { FiUsers } from "react-icons/fi";
 import { RiKey2Line } from "react-icons/ri";
 import { MdOutlineMail } from "react-icons/md";
@@ -9,28 +9,45 @@ import { validate } from "@/components/validate/validte";
 import { IoEyeOff } from "react-icons/io5";
 import Link from "next/link";
 
+import { useRouter } from "next/navigation";
+import { register } from "../../action/register";
 const Signin: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
+  const ref = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const [errors, setErrors] = useState<{
-    email: string;
-    password: string;
-    name: string;
+    email: string | null;
+    password: string | null; // Allowing null for password
+    name: string | null; // Allowing null for name
   }>({
-    email: "",
-    password: "",
-    name: "",
+    email: null,
+    password: null, // Setting password to null by default
+    name: null, // Setting name to null by default
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const isValid = validate(email, password, name, setErrors);
+    if (!isValid) return;
 
-    if (isValid) {
-      console.log("Form submitted successfully");
+    const res = await register({
+      email,
+      password,
+      redirect: false,
+    });
+    ref.current?.reset();
+    if (res?.error) {
+      setErrors({
+        email: res?.error,
+        password: null,
+        name: null,
+      });
+      return;
+    } else {
+      return router.push("/login");
     }
   };
 
@@ -40,7 +57,7 @@ const Signin: React.FC = () => {
         <section className="overflow-y-auto h-[80vh] sm:overflow-hidden sm:h-auto">
           <article className="bg-white w-[90vw] sm:w-[400px] p-6 rounded-lg shadow-lg">
             <h1 className="text-center font-bold text-2xl mb-4">Signup</h1>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} ref={ref}>
               {/* Username Field */}
               <div className="relative mb-6">
                 <label htmlFor="username" className="font-semibold">
