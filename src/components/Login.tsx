@@ -38,10 +38,9 @@ const Login: React.FC = () => {
       if (res?.error) {
         setErrors({
           email: res.error,
-          password: "",
+          password: res.error,
         });
       } else if (res?.ok) {
-        // Successful login
         console.log("Login successful:", { email, password });
         router.push("/"); // Redirect to home page
       }
